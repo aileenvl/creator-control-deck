@@ -1,0 +1,22 @@
+{
+  "name": "creator-control-deck-agent",
+  "version": "1.0.0",
+  "description": "macOS USB-serial agent for Creator Control Deck (Arduino UNO @ 9600)",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "simulate": "node src/index.js --simulate",
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/apps.js && node --check src/alerts.js && node --check src/capture.js"
+  },
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  },
+  "keywords": ["arduino", "serial", "macos", "creator-control-deck"],
+  "license": "MIT"
+}

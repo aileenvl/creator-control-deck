@@ -1,0 +1,54 @@
+name: Checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  agent:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '20.12.0'
+          - os: ubuntu-latest
+            node: '22'
+          - os: ubuntu-latest
+            node: '24'
+          - os: macos-latest
+            node: '24'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: agent/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm test
+      - name: Verify serial library loads
+        run: node --input-type=module -e "import { SerialPort, ReadlineParser } from 'serialport'; new ReadlineParser(); if (!SerialPort) process.exit(1);"
+
+  firmware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.5.1'
+      - run: arduino-cli core update-index
+      - run: arduino-cli core install arduino:avr@1.8.6
+      - run: arduino-cli lib install 'Keypad@3.1.1' 'LiquidCrystal@1.0.7'
+      - run: bash scripts/check-firmware.sh
